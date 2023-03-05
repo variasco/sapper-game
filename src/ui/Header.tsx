@@ -28,11 +28,8 @@ const mapSmileToView: Record<Smile, ReactNode> = {
 
 export const Header = (props: HeaderProps) => {
   const { lose, win, smile, setSmile, minesAmount } = props;
-  const [timer, setTimer] = useState<number>(40 * 60);
   const [stopwatch, setStopwatch] = useState<number>(0);
   const [counting, setCounting] = useState<boolean>(false);
-
-  const minutes = Math.ceil(timer / 60);
 
   const smileButtonClickHandler = () => {
     setSmile(Smile.DOWN);
