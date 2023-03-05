@@ -10,6 +10,7 @@ export interface fieldProps {
   setCover: React.Dispatch<React.SetStateAction<Cover[]>>;
   setLose: React.Dispatch<React.SetStateAction<boolean>>;
   setSmile: React.Dispatch<React.SetStateAction<Smile>>;
+  setMinesAmount: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export enum Cover {
@@ -59,7 +60,7 @@ const mapTileToView: Record<Tiles, ReactNode> = {
 };
 
 export const Field = (props: fieldProps) => {
-  const { size, cover, field, setLose, setCover, setSmile } = props;
+  const { size, cover, field, setLose, setCover, setSmile, setMinesAmount } = props;
   const dimension = new Array(size).fill(null);
 
   const onMouseDownHandler = (x: number, y: number, inSize: number) => {
@@ -125,7 +126,9 @@ export const Field = (props: fieldProps) => {
 
       if (cover[pos(x, y, inSize)] === Cover.Hidden) {
         cover[pos(x, y, inSize)] = Cover.Flag;
+        setMinesAmount((prev) => prev - 1);
       } else if (cover[pos(x, y, inSize)] === Cover.Flag) {
+        setMinesAmount((prev) => prev + 1);
         cover[pos(x, y, inSize)] = Cover.QuestionMark;
       } else if (cover[pos(x, y, inSize)] === Cover.QuestionMark) {
         cover[pos(x, y, inSize)] = Cover.Hidden;
