@@ -64,8 +64,8 @@ export const Field = (props: fieldProps) => {
   const dimension = new Array(size).fill(null);
 
   const onMouseDownHandler = (x: number, y: number, inSize: number) => {
-    // setSmile(Smile.SCARED);
-    // setCover((prevState) => [...prevState, (cover[pos(x, y, inSize)] = Cover.Down)]);
+    setSmile(Smile.SCARED);
+    setCover((prevState) => [...prevState, (cover[pos(x, y, inSize)] = Cover.Down)]);
   };
 
   const onClickHandler = (e: SyntheticEvent, x: number, y: number, inSize: number) => {
