@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import "./App.css";
-import { Cover, createField, Field, Tiles } from "./ui/Field";
+import { createField } from "./services/createField";
+import { Cover, Field, Tiles } from "./ui/Field";
+import { Header, Smile } from "./ui/Header";
+
 
 function App() {
   const [lose, setLose] = useState<boolean>(false);
@@ -8,6 +11,7 @@ function App() {
   const minesAmount = 40;
   const [field] = useState<Array<Tiles>>(() => createField(size, minesAmount));
   const [cover, setCover] = useState<Array<Cover>>(() => new Array(size * size).fill(Cover.Hidden));
+  const [smile, setSmile] = useState<Smile>(Smile.DEFAULT);
   const win = useMemo(
     () =>
       !field.some(
@@ -23,7 +27,7 @@ function App() {
   return (
     <div className="App">
       <div className="game">
-        <div className="header"></div>
+        <Header win={win} lose={lose} smile={smile} setSmile={setSmile}/>
         <Field cover={cover} field={field} setLose={setLose} setCover={setCover} size={size} />
       </div>
     </div>

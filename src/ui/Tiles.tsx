@@ -12,7 +12,8 @@ type Skin =
   | "digit_6"
   | "digit_7"
   | "digit_8"
-  | "bomb";
+  | "bomb"
+  | "bomb_exploded";
 
 export interface TileProps {
   skin?: Skin;

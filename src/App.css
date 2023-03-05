@@ -1,5 +1,47 @@
-.field {
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
 
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+}
+
+.game {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  background-color: #ccc;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 6px;
+}
+
+.timer {
+  height: 23px;
+}
+
+.smile-button {
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  height: 23px;
+}
+
+.stopwatch {
+  height: 23px;
+}
+
+.field {
 }
 
 .field-row {
