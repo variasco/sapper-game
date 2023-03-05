@@ -63,11 +63,11 @@ export const Field = (props: fieldProps) => {
   const dimension = new Array(size).fill(null);
 
   const onMouseDownHandler = (x: number, y: number, inSize: number) => {
-    setSmile(Smile.SCARED);
-    setCover((prevState) => [...prevState, (cover[pos(x, y, inSize)] = Cover.Down)]);
+    // setSmile(Smile.SCARED);
+    // setCover((prevState) => [...prevState, (cover[pos(x, y, inSize)] = Cover.Down)]);
   };
 
-  const onClickHandler = (x: number, y: number, inSize: number) => {
+  const onClickHandler = (e: SyntheticEvent, x: number, y: number, inSize: number) => {
     function open(x: number, y: number) {
       if (x >= 0 && x < inSize && y >= 0 && y < inSize) {
         if (cover[pos(x, y, inSize)] === Cover.Transparent) return;
@@ -75,66 +75,68 @@ export const Field = (props: fieldProps) => {
         opening.push([x, y]);
       }
     }
-
-    if (cover[pos(x, y, inSize)] === Cover.Transparent) return;
-
     const opening: [number, number][] = [];
+    // @ts-ignore
+    if (e?.button === 0) {
+      if (cover[pos(x, y, inSize)] === Cover.Transparent) return;
 
-    open(x, y);
+      open(x, y);
 
-    while (opening.length) {
-      const [x, y] = opening.pop()!;
-      // Заносим изменение в стейт без тригера ререндера
-      cover[pos(x, y, inSize)] = Cover.Transparent;
-      if (field[pos(x, y, inSize)] !== Tiles.DOWN) continue;
+      while (opening.length) {
+        const [x, y] = opening.pop()!;
+        // Заносим изменение в стейт без тригера ререндера
+        cover[pos(x, y, inSize)] = Cover.Transparent;
+        if (field[pos(x, y, inSize)] !== Tiles.DOWN) continue;
 
-      // В случае, когда клетка пустая, открываем соседние клетки
-      open(x + 1, y);
-      open(x - 1, y);
-      open(x, y + 1);
-      open(x, y - 1);
-      open(x + 1, y - 1);
-      open(x - 1, y - 1);
-      open(x + 1, y + 1);
-      open(x - 1, y + 1);
+        // В случае, когда клетка пустая, открываем соседние клетки
+        open(x + 1, y);
+        open(x - 1, y);
+        open(x, y + 1);
+        open(x, y - 1);
+        open(x + 1, y - 1);
+        open(x - 1, y - 1);
+        open(x + 1, y + 1);
+        open(x - 1, y + 1);
+      }
+
+      // Если клетка с миной
+      if (field[pos(x, y, inSize)] === Tiles.BOMB) {
+        // Взорвать все бомбы при проигрыше
+        // field.forEach((_, i) => {
+        //   if (field[i] === Tiles.BOMB) field[i] = Tiles.BOMB_EXPLODED;
+        // });
+
+        // Взорвать бомбу которая была нажата, как в референсе
+        field[pos(x, y, inSize)] = Tiles.BOMB_EXPLODED;
+        cover.forEach((_, i) => {
+          if (cover[i] === Cover.Flag && field[i] !== Tiles.BOMB) field[i] = Tiles.BOMB_MISSING;
+        });
+
+        cover.map((_, i) => (cover[i] = Cover.Transparent));
+        setLose(true);
+      }
+
+      setSmile(Smile.DEFAULT);
+      // Заносим все изменения в стейт
+      setCover((prev) => [...prev]);
+      // @ts-ignore
+    } else if (e.button === 2) {
+      if (cover[pos(x, y, inSize)] === Cover.Transparent) return;
+
+      if (cover[pos(x, y, inSize)] === Cover.Hidden) {
+        cover[pos(x, y, inSize)] = Cover.Flag;
+      } else if (cover[pos(x, y, inSize)] === Cover.Flag) {
+        cover[pos(x, y, inSize)] = Cover.QuestionMark;
+      } else if (cover[pos(x, y, inSize)] === Cover.QuestionMark) {
+        cover[pos(x, y, inSize)] = Cover.Hidden;
+      }
+      setCover((prev) => [...prev]);
     }
-
-    // Если клетка с миной
-    if (field[pos(x, y, inSize)] === Tiles.BOMB) {
-      // Взорвать все бомбы при проигрыше
-      // field.forEach((_, i) => {
-      //   if (field[i] === Tiles.BOMB) field[i] = Tiles.BOMB_EXPLODED;
-      // });
-
-      // Взорвать бомбу которая была нажата, как в референсе
-      field[pos(x, y, inSize)] = Tiles.BOMB_EXPLODED;
-      cover.forEach((_, i) => {
-        if (cover[i] === Cover.Flag && field[i] !== Tiles.BOMB) field[i] = Tiles.BOMB_MISSING;
-      });
-
-      cover.map((_, i) => (cover[i] = Cover.Transparent));
-      setLose(true);
-    }
-
-    setSmile(Smile.DEFAULT);
-    // Заносим все изменения в стейт
-    setCover((prev) => [...prev]);
   };
 
-  const onRightClickHandler = (e: SyntheticEvent, x: number, y: number, inSize: number) => {
+  const onRightClickHandler = (e: SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    if (cover[pos(x, y, inSize)] === Cover.Transparent) return;
-
-    if (cover[pos(x, y, inSize)] === Cover.Hidden) {
-      cover[pos(x, y, inSize)] = Cover.Flag;
-    } else if (cover[pos(x, y, inSize)] === Cover.Flag) {
-      cover[pos(x, y, inSize)] = Cover.QuestionMark;
-    } else if (cover[pos(x, y, inSize)] === Cover.QuestionMark) {
-      cover[pos(x, y, inSize)] = Cover.Hidden;
-    }
-    setCover((prev) => [...prev]);
   };
 
   return (
@@ -146,8 +148,8 @@ export const Field = (props: fieldProps) => {
               className="field-cell"
               key={y}
               onMouseDown={() => onMouseDownHandler(x, y, size)}
-              onMouseUp={() => onClickHandler(x, y, size)}
-              onContextMenu={(e) => onRightClickHandler(e, x, y, size)}
+              onMouseUp={(e) => onClickHandler(e, x, y, size)}
+              onContextMenu={onRightClickHandler}
             >
               {cover[pos(x, y, size)] !== Cover.Transparent
                 ? mapCoverToView[cover[pos(x, y, size)]]

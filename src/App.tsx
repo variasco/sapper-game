@@ -10,6 +10,7 @@ function App() {
   const size = 16;
   const minesAmount = 40;
   const [field] = useState<Array<Tiles>>(() => createField(size, minesAmount));
+  const [mines, setMines] = useState<number>(minesAmount);
   const [cover, setCover] = useState<Array<Cover>>(() => new Array(size * size).fill(Cover.Hidden));
   const [smile, setSmile] = useState<Smile>(Smile.DEFAULT);
   const win = useMemo(
@@ -21,13 +22,10 @@ function App() {
     [cover, field]
   );
 
-  if (lose) console.log("you lose");
-  if (win) console.log("you win");
-
   return (
     <div className="App">
       <div className="game">
-        <Header win={win} lose={lose} smile={smile} setSmile={setSmile}/>
+        <Header minesAmount={mines} setMinesAmount={setMines} win={win} lose={lose} smile={smile} setSmile={setSmile}/>
         <Field setSmile={setSmile} cover={cover} field={field} setLose={setLose} setCover={setCover} size={size} />
       </div>
     </div>

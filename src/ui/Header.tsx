@@ -2,10 +2,12 @@ import { ReactNode, useEffect, useState } from "react";
 import { Timer } from "./Timer";
 
 export interface HeaderProps {
+  minesAmount: number;
   win: boolean;
   lose: boolean;
   smile: Smile;
   setSmile: React.Dispatch<React.SetStateAction<Smile>>;
+  setMinesAmount: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export enum Smile {
@@ -25,7 +27,7 @@ const mapSmileToView: Record<Smile, ReactNode> = {
 };
 
 export const Header = (props: HeaderProps) => {
-  const { lose, win, smile, setSmile } = props;
+  const { lose, win, smile, setSmile, minesAmount } = props;
   const [timer, setTimer] = useState<number>(40 * 60);
   const [stopwatch, setStopwatch] = useState<number>(0);
   const [counting, setCounting] = useState<boolean>(false);
@@ -47,16 +49,6 @@ export const Header = (props: HeaderProps) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      counting && setTimer((timer) => (timer >= 1 ? timer - 1 : 0));
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [timer, counting]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
       counting && setStopwatch((stopwatch) => (stopwatch <= 999 ? stopwatch + 1 : 0));
     }, 1000);
 
@@ -67,8 +59,8 @@ export const Header = (props: HeaderProps) => {
 
   return (
     <div className="header">
-      <div className="timer">
-        <Timer time={minutes} />
+      <div className="mines-amount">
+        <Timer time={minesAmount} />
       </div>
       <button
         className="smile-button"
