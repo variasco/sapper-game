@@ -1,5 +1,6 @@
 import { ReactNode, SyntheticEvent } from "react";
 import { pos } from "../services/createField";
+import { Smile } from "./Header";
 import { Tile } from "./Tiles";
 
 export interface fieldProps {
@@ -8,6 +9,7 @@ export interface fieldProps {
   field: Array<Tiles>;
   setCover: React.Dispatch<React.SetStateAction<Cover[]>>;
   setLose: React.Dispatch<React.SetStateAction<boolean>>;
+  setSmile: React.Dispatch<React.SetStateAction<Smile>>;
 }
 
 export enum Cover {
@@ -15,6 +17,7 @@ export enum Cover {
   Hidden,
   Flag,
   QuestionMark,
+  Down,
 }
 
 export enum Tiles {
@@ -34,6 +37,7 @@ export enum Tiles {
 
 const mapCoverToView: Record<Cover, ReactNode> = {
   [Cover.Transparent]: null,
+  [Cover.Down]: <Tile skin="down" />,
   [Cover.Hidden]: <Tile skin="hidden" />,
   [Cover.Flag]: <Tile skin="flag" />,
   [Cover.QuestionMark]: <Tile skin="question" />,
@@ -55,8 +59,13 @@ const mapTileToView: Record<Tiles, ReactNode> = {
 };
 
 export const Field = (props: fieldProps) => {
-  const { size, cover, field, setLose, setCover } = props;
+  const { size, cover, field, setLose, setCover, setSmile } = props;
   const dimension = new Array(size).fill(null);
+
+  const onMouseDownHandler = (x: number, y: number, inSize: number) => {
+    setSmile(Smile.SCARED);
+    setCover((prevState) => [...prevState, (cover[pos(x, y, inSize)] = Cover.Down)]);
+  };
 
   const onClickHandler = (x: number, y: number, inSize: number) => {
     function open(x: number, y: number) {
@@ -102,11 +111,12 @@ export const Field = (props: fieldProps) => {
       cover.forEach((_, i) => {
         if (cover[i] === Cover.Flag && field[i] !== Tiles.BOMB) field[i] = Tiles.BOMB_MISSING;
       });
-      
+
       cover.map((_, i) => (cover[i] = Cover.Transparent));
       setLose(true);
     }
 
+    setSmile(Smile.DEFAULT);
     // Заносим все изменения в стейт
     setCover((prev) => [...prev]);
   };
@@ -135,7 +145,8 @@ export const Field = (props: fieldProps) => {
             <div
               className="field-cell"
               key={y}
-              onClick={() => onClickHandler(x, y, size)}
+              onMouseDown={() => onMouseDownHandler(x, y, size)}
+              onMouseUp={() => onClickHandler(x, y, size)}
               onContextMenu={(e) => onRightClickHandler(e, x, y, size)}
             >
               {cover[pos(x, y, size)] !== Cover.Transparent

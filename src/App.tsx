@@ -28,7 +28,7 @@ function App() {
     <div className="App">
       <div className="game">
         <Header win={win} lose={lose} smile={smile} setSmile={setSmile}/>
-        <Field cover={cover} field={field} setLose={setLose} setCover={setCover} size={size} />
+        <Field setSmile={setSmile} cover={cover} field={field} setLose={setLose} setCover={setCover} size={size} />
       </div>
     </div>
   );
