@@ -20,6 +20,7 @@ export enum Cover {
 export enum Tiles {
   BOMB,
   BOMB_EXPLODED,
+  BOMB_MISSING,
   DOWN,
   ONE,
   TWO,
@@ -41,6 +42,7 @@ const mapCoverToView: Record<Cover, ReactNode> = {
 const mapTileToView: Record<Tiles, ReactNode> = {
   [Tiles.BOMB]: <Tile skin="bomb" />,
   [Tiles.BOMB_EXPLODED]: <Tile skin="bomb_exploded" />,
+  [Tiles.BOMB_MISSING]: <Tile skin="bomb_missing" />,
   [Tiles.DOWN]: <Tile skin="down" />,
   [Tiles.ONE]: <Tile skin="digit_1" />,
   [Tiles.TWO]: <Tile skin="digit_2" />,
@@ -90,9 +92,17 @@ export const Field = (props: fieldProps) => {
 
     // Если клетка с миной
     if (field[pos(x, y, inSize)] === Tiles.BOMB) {
-      field.forEach((_, i) => {
-        if (field[i] === Tiles.BOMB) field[i] = Tiles.BOMB_EXPLODED;
+      // Взорвать все бомбы при проигрыше
+      // field.forEach((_, i) => {
+      //   if (field[i] === Tiles.BOMB) field[i] = Tiles.BOMB_EXPLODED;
+      // });
+
+      // Взорвать бомбу которая была нажата, как в референсе
+      field[pos(x, y, inSize)] = Tiles.BOMB_EXPLODED;
+      cover.forEach((_, i) => {
+        if (cover[i] === Cover.Flag && field[i] !== Tiles.BOMB) field[i] = Tiles.BOMB_MISSING;
       });
+      
       cover.map((_, i) => (cover[i] = Cover.Transparent));
       setLose(true);
     }

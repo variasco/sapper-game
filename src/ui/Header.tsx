@@ -28,6 +28,8 @@ export const Header = (props: HeaderProps) => {
   const { lose, win, smile, setSmile } = props;
   const [timer, setTimer] = useState<number>(40 * 60);
   const [stopwatch, setStopwatch] = useState<number>(0);
+  const [counting, setCounting] = useState<boolean>(false);
+
   const minutes = Math.ceil(timer / 60);
 
   const smileButtonClickHandler = () => {
@@ -40,24 +42,28 @@ export const Header = (props: HeaderProps) => {
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimer((timer) => (timer >= 1 ? timer - 1 : 0));
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [timer]);
+    setCounting(!win && !lose);
+  }, [win, lose]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setStopwatch((stopwatch) => (stopwatch <= 999 ? stopwatch + 1 : 0));
+      counting && setTimer((timer) => (timer >= 1 ? timer - 1 : 0));
     }, 1000);
 
     return () => {
       clearInterval(interval);
     };
-  }, [stopwatch]);
+  }, [timer, counting]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      counting && setStopwatch((stopwatch) => (stopwatch <= 999 ? stopwatch + 1 : 0));
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [stopwatch, counting]);
 
   return (
     <div className="header">
