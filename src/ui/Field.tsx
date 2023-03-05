@@ -1,5 +1,4 @@
-import { ReactNode, SyntheticEvent } from "react";
-import { pos } from "../services/createField";
+import { ReactNode, SyntheticEvent, useState } from "react";
 import { Smile } from "./Header";
 import { Tile } from "./Tiles";
 
@@ -7,10 +6,12 @@ export interface fieldProps {
   size: number;
   cover: Array<Cover>;
   field: Array<Tiles>;
+  minesAmount: number;
   setCover: React.Dispatch<React.SetStateAction<Cover[]>>;
   setLose: React.Dispatch<React.SetStateAction<boolean>>;
   setSmile: React.Dispatch<React.SetStateAction<Smile>>;
   setMinesAmount: React.Dispatch<React.SetStateAction<number>>;
+  setField: React.Dispatch<React.SetStateAction<Tiles[]>>;
 }
 
 export enum Cover {
@@ -60,7 +61,10 @@ const mapTileToView: Record<Tiles, ReactNode> = {
 };
 
 export const Field = (props: fieldProps) => {
-  const { size, cover, field, setLose, setCover, setSmile, setMinesAmount } = props;
+  const { size, cover, field, minesAmount, setField, setLose, setCover, setSmile, setMinesAmount } =
+    props;
+  const [firstClick, setFirstClick] = useState<boolean>(true);
+
   const dimension = new Array(size).fill(null);
 
   const onMouseDownHandler = (e: SyntheticEvent, x: number, y: number, inSize: number) => {
@@ -82,6 +86,12 @@ export const Field = (props: fieldProps) => {
     const opening: [number, number][] = [];
     // @ts-ignore
     if (e?.button === 0) {
+      // Генерируем поле, сразу после клика
+      if (firstClick) {
+        setField(createField(inSize, minesAmount, x, y));
+        setFirstClick(false);
+      }
+
       if (cover[pos(x, y, inSize)] === Cover.Transparent) return;
 
       open(x, y);
@@ -167,3 +177,73 @@ export const Field = (props: fieldProps) => {
     </div>
   );
 };
+
+export function pos(x: number, y: number, size: number) {
+  return y * size + x;
+}
+
+export function createField(size: number, minesAmount: number, startX: number, startY: number) {
+  const field: Array<Tiles> = new Array(size * size).fill(Tiles.DOWN);
+
+  function increment(x: number, y: number) {
+    if (x >= 0 && x < size && y >= 0 && y < size) {
+      if (field[pos(x, y, size)] === Tiles.BOMB) return;
+      switch (field[pos(x, y, size)]) {
+        case Tiles.ONE:
+          field[pos(x, y, size)] = Tiles.TWO;
+          break;
+
+        case Tiles.TWO:
+          field[pos(x, y, size)] = Tiles.THREE;
+          break;
+
+        case Tiles.THREE:
+          field[pos(x, y, size)] = Tiles.FOUR;
+          break;
+
+        case Tiles.FOUR:
+          field[pos(x, y, size)] = Tiles.FIVE;
+          break;
+
+        case Tiles.FIVE:
+          field[pos(x, y, size)] = Tiles.SIX;
+          break;
+
+        case Tiles.SIX:
+          field[pos(x, y, size)] = Tiles.SEVEN;
+          break;
+
+        case Tiles.SEVEN:
+          field[pos(x, y, size)] = Tiles.EIGHT;
+          break;
+
+        default:
+          field[pos(x, y, size)] = Tiles.ONE;
+          break;
+      }
+    }
+  }
+
+  for (let i = 0; i < minesAmount; ) {
+    const x = Math.floor(Math.random() * size);
+    const y = Math.floor(Math.random() * size);
+
+    if (field[pos(x, y, size)] === Tiles.BOMB) continue;
+    if (x === startX && y === startY) continue;
+
+    field[pos(x, y, size)] = Tiles.BOMB;
+
+    i++;
+
+    increment(x + 1, y);
+    increment(x - 1, y);
+    increment(x, y + 1);
+    increment(x, y - 1);
+    increment(x + 1, y - 1);
+    increment(x - 1, y - 1);
+    increment(x + 1, y + 1);
+    increment(x - 1, y + 1);
+  }
+
+  return field;
+}
