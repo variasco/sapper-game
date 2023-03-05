@@ -63,9 +63,12 @@ export const Field = (props: fieldProps) => {
   const { size, cover, field, setLose, setCover, setSmile, setMinesAmount } = props;
   const dimension = new Array(size).fill(null);
 
-  const onMouseDownHandler = (x: number, y: number, inSize: number) => {
-    setSmile(Smile.SCARED);
-    setCover((prevState) => [...prevState, (cover[pos(x, y, inSize)] = Cover.Down)]);
+  const onMouseDownHandler = (e: SyntheticEvent, x: number, y: number, inSize: number) => {
+    // @ts-ignore
+    if (e?.button === 0) {
+      setSmile(Smile.SCARED);
+      setCover((prevState) => [...prevState, (cover[pos(x, y, inSize)] = Cover.Down)]);
+    }
   };
 
   const onClickHandler = (e: SyntheticEvent, x: number, y: number, inSize: number) => {
@@ -150,7 +153,7 @@ export const Field = (props: fieldProps) => {
             <div
               className="field-cell"
               key={y}
-              onMouseDown={() => onMouseDownHandler(x, y, size)}
+              onMouseDown={(e) => onMouseDownHandler(e, x, y, size)}
               onMouseUp={(e) => onClickHandler(e, x, y, size)}
               onContextMenu={onRightClickHandler}
             >
